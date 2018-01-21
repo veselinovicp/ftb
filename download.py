@@ -6,6 +6,8 @@ import pandas as pd
 import sys
 import json
 from urllib.parse import quote
+import configparser
+
 
 # https://api-fxtrade.oanda.com/v1/candles?instrument=EUR_USD&count=2&candleFormat=bidask&granularity=D&dailyAlignment=0&alignmentTimezone=America%2FNew_York
 
@@ -33,7 +35,7 @@ OandaSymbol = {
 }
 
 
-def update_positioning_data(tokenValue, count):
+def download_data(tokenValue, count):
     token = "Bearer %s" % (tokenValue)
 
     headers = {'Authorization': token, 'Connection': 'Keep-Alive', 'Accept-Encoding': 'gzip, deflate',
@@ -87,7 +89,7 @@ def update_positioning_data(tokenValue, count):
 
 
         if totalAmount >= count:
-            with open("EUR_USD_" + str(totalAmount) + ".json", 'w') as outfile:
+            with open("data/EUR_USD_" + str(totalAmount) + ".json", 'w') as outfile:
 
                 json.dump(combined, outfile)
                 headers = ["time", "openBid", "openAsk", "highBid", "highAsk", "lowBid", "lowAsk", "closeBid", "closeAsk", "volume"]
@@ -104,39 +106,23 @@ def update_positioning_data(tokenValue, count):
 
 
 
-                df.to_csv("EUR_USD_" + str(totalAmount) + ".csv")#, date_format='%Y-%m-%d %H:%M:%S'
+                df.to_csv("data/EUR_USD_" + str(totalAmount) + ".csv")#, date_format='%Y-%m-%d %H:%M:%S'
             break
 
         totalAmount += candlesPerDownload
 
         i = i + 1
 
-    # position_data = resp['data'][OandaSymbol[symbol]]['data']
-    # for p in range(len(position_data)):
-    #     position_data[p][0] = datetime.datetime.fromtimestamp(position_data[p][0])
-    # headers = ["timestamp", "lpr", "rate"]
-    # df = pd.DataFrame(position_data, columns=headers)
-    # df = df.set_index(df['timestamp'])
-    # df = df.drop(['timestamp', 'rate'], axis=1)
-    # df = df[:-1]
-    #
-    # try:
-    #     old_df = pd.DataFrame.from_csv("OANDA_POSITION_"+symbol + '.csv', index_col=0)
-    #     df = pd.concat([df,old_df])
-    # except:
-    #     print
-    #     'No old datafile found. Generating new one.'
-    #
-    # df = df[~df.index.duplicated(keep='first')]
-    #
-    # df.to_csv("OANDA_POSITION_"+symbol + '.csv', date_format='%Y-%m-%d %H:%M:%S')
 
 
 def main():
     symbolsToUpdate = ["EURUSD", "GBPUSD", "USDJPY", "USDCHF", "EURJPY", "AUDUSD", "AUDJPY", "EURAUD", "USDCAD",
                        "GBPJPY", "EURGBP", "GBPCHF", "CADJPY"]
 
-    update_positioning_data("SECRET_KEY", 200000)
+    config = configparser.RawConfigParser()
+    config.read('secret.properties')
+
+    download_data(config.get('DEFAULT', 'OANDA_API_KEY'), 200000)
 
 
 ##################################
