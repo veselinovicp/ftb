@@ -103,9 +103,6 @@ def download_data(tokenValue, count):
 
                 del df['time']
                 df.sort_index(inplace=True)
-
-
-
                 df.to_csv("data/EUR_USD_" + str(totalAmount) + ".csv")#, date_format='%Y-%m-%d %H:%M:%S'
             break
 
