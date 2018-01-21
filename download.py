@@ -136,7 +136,7 @@ def main():
     symbolsToUpdate = ["EURUSD", "GBPUSD", "USDJPY", "USDCHF", "EURJPY", "AUDUSD", "AUDJPY", "EURAUD", "USDCAD",
                        "GBPJPY", "EURGBP", "GBPCHF", "CADJPY"]
 
-    update_positioning_data("ddb127df19fe3f7f7a0553e9147176dd-2d166d236daebbe3ae503ac5e459af67", 200000)
+    update_positioning_data("SECRET_KEY", 200000)
 
 
 ##################################
