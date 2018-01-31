@@ -16,6 +16,7 @@ class DataMachine:
         self.loss = 0.0020
         self.train_percent = 70.
         self.input_labels = []
+        self.output_labels = ["max_high_bid", "min_low_ask"]
 
     def prepare_data(self):
         self.__download_data()
@@ -33,13 +34,13 @@ class DataMachine:
         train = self.df[:split_num]
         test = self.df[split_num:]
 
-        output_labels = ['buy', 'sell', 'idle']
+        # output_labels = ['buy', 'sell', 'idle']
 
         train_input = train[self.input_labels]
-        train_output = train[output_labels]
+        train_output = train[self.output_labels]
 
         test_input = test[self.input_labels]
-        test_output = test[output_labels]
+        test_output = test[self.output_labels]
 
         train_input.to_csv("../data/" + self.currency + "_train_input.csv")
         train_output.to_csv("../data/" + self.currency + "_train_output.csv")
@@ -92,6 +93,22 @@ class DataMachine:
             self.input_labels.append(volume___format)
         self.df.dropna(axis=0, inplace=True)
 
+    def __get_max_high_bid(self, index):
+        max_high_bid = 0.
+        for i in range(index, min(index + 33, len(self.df))):
+            if self.df.at[i, 'highBid'] > max_high_bid:
+                max_high_bid = self.df.at[i, 'highBid']
+
+        return max_high_bid
+
+    def __get_min_low_ask(self, index):
+        min_low_ask = self.df.at[index, 'lowAsk']
+        for i in range(index, min(index + 33, len(self.df))):
+            if self.df.at[i, 'lowAsk'] < min_low_ask:
+                min_low_ask = self.df.at[i, 'lowAsk']
+
+        return min_low_ask
+
     def __should_sell(self, index, openBid):
         for i in range(index, min(index + 33, len(self.df))):
             if (self.df.at[i, 'highAsk'] - openBid > self.loss):
@@ -121,38 +138,47 @@ class DataMachine:
 
         return False
 
+    # def __prepare_data(self):
+    #     print("preparing data")
+    #
+    #     # self.df = pd.read_csv('data/EUR_USD_200000.csv', float_precision='round_trip')
+    #     print("data length: ", len(self.df))
+    #     new_columns = pd.DataFrame([], columns=["buy", "sell", "idle"])
+    #     self.df = self.df.join(new_columns)
+    #
+    #     # df['0', 'buy'] = 1
+    #
+    #     i = 0
+    #     for index, row in self.df.iterrows():
+    #         print(index, ", row: ", row['openBid'])
+    #
+    #         if self.__should_buy(index, row['openAsk']):
+    #             self.df.set_value(index, 'buy', 1)
+    #             self.df.set_value(index, 'sell', 0)
+    #             self.df.set_value(index, 'idle', 0)
+    #         elif self.__should_sell(index, row['openBid']):
+    #             self.df.set_value(index, 'buy', 0)
+    #             self.df.set_value(index, 'sell', 1)
+    #             self.df.set_value(index, 'idle', 0)
+    #         else:
+    #             self.df.set_value(index, 'buy', 0)
+    #             self.df.set_value(index, 'sell', 0)
+    #             self.df.set_value(index, 'idle', 1)
+    #
+    #         i = i + 1
+
     def __prepare_data(self):
         print("preparing data")
 
         # self.df = pd.read_csv('data/EUR_USD_200000.csv', float_precision='round_trip')
         print("data length: ", len(self.df))
-        new_columns = pd.DataFrame([], columns=["buy", "sell", "idle"])
+        new_columns = pd.DataFrame([], columns=self.output_labels)
         self.df = self.df.join(new_columns)
 
-        # df['0', 'buy'] = 1
-
-        i = 0
         for index, row in self.df.iterrows():
             print(index, ", row: ", row['openBid'])
-
-            if self.__should_buy(index, row['openAsk']):
-                self.df.set_value(index, 'buy', 1)
-                self.df.set_value(index, 'sell', 0)
-                self.df.set_value(index, 'idle', 0)
-            elif self.__should_sell(index, row['openBid']):
-                self.df.set_value(index, 'buy', 0)
-                self.df.set_value(index, 'sell', 1)
-                self.df.set_value(index, 'idle', 0)
-            else:
-                self.df.set_value(index, 'buy', 0)
-                self.df.set_value(index, 'sell', 0)
-                self.df.set_value(index, 'idle', 1)
-
-            i = i + 1
-            # if i > 500:
-            #     break
-
-        # df.to_csv("data/EUR_USD_200000_prepared.csv")
+            self.df.set_value(index, 'max_high_bid', self.__get_max_high_bid(index))
+            self.df.set_value(index, 'min_low_ask', self.__get_min_low_ask(index))
 
     def __download_data(self):
         config = configparser.RawConfigParser()
@@ -210,6 +236,8 @@ class DataMachine:
             for i, val in enumerate(resp['candles']):  # reversed  enumerate
                 combined.append(val)
 
+            totalAmount += candlesPerDownload
+
             if totalAmount >= self.number_of_samples:
                 # with open("data/EUR_USD_" + str(totalAmount) + ".json", 'w') as outfile:
                 #     json.dump(combined, outfile)
@@ -233,6 +261,6 @@ class DataMachine:
                     # df.to_csv("data/EUR_USD_" + str(totalAmount) + ".csv")
                 break
 
-            totalAmount += candlesPerDownload
+
 
             i = i + 1
