@@ -1,0 +1,3 @@
+
+
+class DataMachine(object): pass
