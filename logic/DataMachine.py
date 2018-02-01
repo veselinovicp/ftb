@@ -42,11 +42,11 @@ class DataMachine:
         test_input = test[self.input_labels]
         test_output = test[self.output_labels]
 
-        train_input.to_csv("../data/" + self.currency + "_train_input.csv")
-        train_output.to_csv("../data/" + self.currency + "_train_output.csv")
+        train_input.to_csv("../data/" + self.currency + "_train_input.csv",   index = False)
+        train_output.to_csv("../data/" + self.currency + "_train_output.csv",  index = False)
 
-        test_input.to_csv("../data/" + self.currency + "_test_input.csv")
-        test_output.to_csv("../data/" + self.currency + "_test_output.csv")
+        test_input.to_csv("../data/" + self.currency + "_test_input.csv",  index = False)
+        test_output.to_csv("../data/" + self.currency + "_test_output.csv",  index = False)
 
 
     def __prepare_windowed_data(self):
