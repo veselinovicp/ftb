@@ -13,8 +13,8 @@ class Trainer:
 
     def train(self):
         print("Start training")
-        model_checkpoint = ModelCheckpoint(self.folder+"weights.{epoch:02d}-{val_acc:.2f}.hdf5", monitor='val_acc', verbose=1, save_best_only=False, mode='auto')
-        tensor_board = TensorBoard(log_dir=self.folder+'tensorboard', histogram_freq=0,
+        model_checkpoint = ModelCheckpoint(self.folder+"weights.{epoch:02d}-{val_loss:.2f}.hdf5", monitor='val_acc', verbose=1, save_best_only=False, mode='auto')
+        tensor_board = TensorBoard(log_dir=self.folder, histogram_freq=0,
                                   write_graph=True, write_images=False)
         self.model.fit(self.train_input, self.train_output, batch_size=32, epochs=200, verbose=1,
                        callbacks=[model_checkpoint, tensor_board])

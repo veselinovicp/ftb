@@ -1,6 +1,8 @@
 
 # Directories and files to ignore when uploading code to floyd
 
+*.csv
+*.json
 .git
 .eggs
 eggs
