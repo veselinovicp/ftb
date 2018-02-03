@@ -6,7 +6,7 @@ import logic.Trainer as lg
 class TestStringMethods(unittest.TestCase):
 
     def test_simple(self):
-        trainer = lg.Trainer()
+        trainer = lg.Trainer(debug_mode=True)
         trainer.train()
 
         # data_machine.prepare_data()

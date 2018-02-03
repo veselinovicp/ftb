@@ -176,7 +176,7 @@ class DataMachine:
         self.df = self.df.join(new_columns)
 
         for index, row in self.df.iterrows():
-            print(index, ", row: ", row['openBid'])
+            print((index/len(self.df))*100., " %")
             self.df.set_value(index, 'max_high_bid', self.__get_max_high_bid(index))
             self.df.set_value(index, 'min_low_ask', self.__get_min_low_ask(index))
 
