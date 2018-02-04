@@ -1,3 +1,7 @@
 *.csv
 *.json
 *.DESKTOP-J488HGT
+*.hdf5
+*.00.hdf5
+*.01.hdf5
+*.backup

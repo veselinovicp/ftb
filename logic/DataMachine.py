@@ -3,6 +3,7 @@ from urllib.parse import quote
 import configparser
 import pandas as pd
 import requests
+from sklearn.preprocessing import MinMaxScaler
 
 
 class DataMachine:
@@ -14,7 +15,7 @@ class DataMachine:
 
         self.profit = 0.0020
         self.loss = 0.0020
-        self.train_percent = 70.
+        self.train_percent = 80.
         self.input_labels = []
         self.output_labels = ["max_high_bid", "min_low_ask"]
 
@@ -25,6 +26,8 @@ class DataMachine:
 
         self.__prepare_test_and_train()
 
+
+
     def __prepare_test_and_train(self):
 
 
@@ -34,13 +37,22 @@ class DataMachine:
         train = self.df[:split_num]
         test = self.df[split_num:]
 
-        # output_labels = ['buy', 'sell', 'idle']
-
         train_input = train[self.input_labels]
+        train_input_mms = MinMaxScaler()
+        train_input[self.input_labels] = train_input_mms.fit_transform(train[self.input_labels])
+        pd.DataFrame({'scale_': train_input_mms.scale_, 'min_': train_input_mms.min_}).to_csv("../data/" + self.currency + "_input_min_max.csv",   index = False)
+
         train_output = train[self.output_labels]
+        train_output_mms = MinMaxScaler()
+        train_output[self.output_labels] = train_output_mms.fit_transform(train[self.output_labels])
+        pd.DataFrame({'scale_': train_output_mms.scale_, 'min_': train_output_mms.min_}).to_csv(
+            "../data/" + self.currency + "_output_min_max.csv", index=False)
 
         test_input = test[self.input_labels]
+        test_input[self.input_labels] = train_input_mms.transform(test[self.input_labels])
+
         test_output = test[self.output_labels]
+        test_output[self.output_labels] = train_output_mms.transform(test[self.output_labels])
 
         train_input.to_csv("../data/" + self.currency + "_train_input.csv",   index = False)
         train_output.to_csv("../data/" + self.currency + "_train_output.csv",  index = False)

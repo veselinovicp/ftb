@@ -1,6 +1,8 @@
 
 # Directories and files to ignore when uploading code to floyd
 
+*.backup
+*.00.hdf5
 *.DESKTOP-J488HGT
 *.csv
 *.json
